@@ -301,7 +301,7 @@ impl Emu {
         let (result, borrow) = self.v_reg[x].overflowing_sub(self.v_reg[y]);
 
         self.v_reg[x] = result;
-        self.v_reg[0xF] = borrow as u8;
+        self.v_reg[0xF] = !borrow as u8;
     }
 
     //Right shift
@@ -321,16 +321,16 @@ impl Emu {
 
         let (result, borrow) = self.v_reg[x].overflowing_sub(self.v_reg[y]);
         //Storing in wrong register
-        self.v_reg[x] = result;
-        self.v_reg[0xF] = borrow as u8;
+        self.v_reg[y] = result;
+        self.v_reg[0xF] = !borrow as u8;
     }
 
-    //Right shift with overflowed bit in the vf register
+    //left shift with overflowed bit in the vf register
     //Opcode-8XYE - VX «= 1
     fn left_shift(&mut self, digit2: u16) {
         let x = digit2 as usize;
         //Check if equivalent
-        let msb = self.v_reg[x] & 0xF;
+        let msb = self.v_reg[x] & 8;
         self.v_reg[x] <<= 1;
         self.v_reg[0xF] = msb;
     }
@@ -389,7 +389,7 @@ impl Emu {
 
                     let idx = x + y * SCREEN_WIDTH;
                     //check if screen pixel flipped
-                    flipped |= !self.screen[idx];
+                    flipped |= self.screen[idx];
                     self.screen[idx] ^= true;
                 }
             }
